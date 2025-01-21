@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import argparse
-from commands import up, down, test_connection, run_testbed
+from commands import up, down, test_connection, run_testbed, capture
 
 
 def configure_cli_args():
@@ -11,8 +11,8 @@ def configure_cli_args():
     # Topology commands
     topology_parser = subparsers.add_parser(
         "topology", help="Commands to manage topology")
-    topology_parser .add_argument("name", type=str,
-                                  help="Name/ID to use for topolgy/namespaces")
+    topology_parser.add_argument("name", type=str,
+                                 help="Name/ID to use for topolgy/namespaces")
     topology_subparsers = topology_parser.add_subparsers(
         dest="topology_command", required=True)
 
@@ -33,6 +33,20 @@ def configure_cli_args():
         "performance_tool", choices=["browsertime", "lighthouse"], help="Performance measurement tool"
     )
     run_parser.set_defaults(func=run_testbed)
+
+    # site commands
+    site_parser = subparsers.add_parser(
+        "site", help="Perform site-related commands")
+    site_parser.add_argument("website", type=str, help="Target website (e.x.: www.wikipedia.org")
+
+    site_cmd_parser = site_parser.add_subparsers(
+        dest="site_command", required=True)
+    capture_parser = site_cmd_parser.add_parser(
+        "capture", help="Capture a given website")
+    capture_parser.add_argument(
+        "--overwrite", action="store_true", help="Overwrite existing protobuf_files"
+    )
+    capture_parser.set_defaults(func=capture)
 
     return parser.parse_args()
 
