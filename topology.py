@@ -1,6 +1,7 @@
 # from setup.process import run
 import math
 from process import runcmd
+from dns import DNS_ADDR
 
 
 class Topology:
@@ -29,7 +30,7 @@ class Topology:
         self._setup_server_ns()
 
         # sets up the namespace, veth pair, and ip for the DNS server
-        self._setup_dns("10.0.1.4")
+        self._setup_dns(DNS_ADDR)
 
 
     # connects an arbitrary NS to the -clients NS with a given IP:
