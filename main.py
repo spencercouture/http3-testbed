@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import argparse
-from commands import up, down, test_connection, run_testbed, capture
+from commands import *
 
 
 def configure_cli_args():
@@ -30,22 +30,43 @@ def configure_cli_args():
     run_parser.add_argument(
         "server", choices=["quiche", "h2o"], help="Server type")
     run_parser.add_argument(
-        "performance_tool", choices=["browsertime", "lighthouse"], help="Performance measurement tool"
-    )
+        "performance_tool", choices=["browsertime", "lighthouse"], help="Performance measurement tool")
     run_parser.set_defaults(func=run_testbed)
+
+    # Server commands
+    server_parser = subparsers.add_parser(
+        "server", help="Commands to manage servers")
+    server_parser.add_argument(
+        "server", choices=servers.keys(), help="Target server")
+    server_cmd_parser = server_parser.add_subparsers(
+        dest="server_command", required=True)
+    start_parser = server_cmd_parser.add_parser(
+        "start", help="Start a server in a particular namespace")
+    start_parser.add_argument("--website", required=True, type=str, help="Website to serve")
+    start_parser.add_argument("--namespace-id", required=True, type=str, help="Name/ID of topology to run on")
+    start_parser.add_argument("--address", required=True, type=str, default="10.0.9.83", help="Address to serve on")
+    start_parser.add_argument("--port", type=int, default=443, help="Port to server on (default 443)")
+    start_parser.set_defaults(func=start_server)
+    stop_parser = server_cmd_parser.add_parser("stop", help="Stop a server in a particular namespace")
+    stop_parser.add_argument("--namespace-id", required=True, type=str, help="Name/ID of topology to stop in")
+    stop_parser.set_defaults(func=stop_server)
+    copy_parser = server_cmd_parser.add_parser("copy", help="Copy server files to a certain location")
+    copy_parser.add_argument("--namespace-id", required=True, type=str, help="Name/ID of topology to stop in")
+    copy_parser.add_argument("--destination", required=True, type=str, help="Location to copy server files to")
+    copy_parser.set_defaults(func=copy_server_files)
 
     # site commands
     site_parser = subparsers.add_parser(
         "site", help="Perform site-related commands")
-    site_parser.add_argument("website", type=str, help="Target website (e.x.: www.wikipedia.org")
-
+    site_parser.add_argument(
+        "website", type=str, help="Target website (e.x.: www.wikipedia.org")
+    # add subcommands
     site_cmd_parser = site_parser.add_subparsers(
         dest="site_command", required=True)
     capture_parser = site_cmd_parser.add_parser(
         "capture", help="Capture a given website")
     capture_parser.add_argument(
-        "--overwrite", action="store_true", help="Overwrite existing protobuf_files"
-    )
+        "--overwrite", action="store_true", help="Overwrite existing protobuf_files")
     capture_parser.set_defaults(func=capture)
 
     return parser.parse_args()

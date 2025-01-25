@@ -93,5 +93,12 @@ def site_exists(site):
     proto_path = os.path.join(site_path, "protobuf_files")
     return os.path.exists(proto_path)
 
+
+# gets the protobuf_files path
+def get_protobuf_path(site):
+    assert site_exists(site)
+    return os.path.join(SITES_DIR, site, "protobuf_files")
+
+
 if __name__ == "__main__":
     capture_site("www.wikipedia.org", overwrite=True)
