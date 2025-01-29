@@ -1,6 +1,7 @@
 from topology import Topology
 from mitmproxy.mitmproxy import capture_site, site_exists, get_hostnames
 from servers import quiche
+from clients import browsertime
 from certs.certs import create_certs
 from dns import start_dnsmasq
 import os
@@ -8,6 +9,10 @@ import os
 # add new servers here
 servers = {
     "quiche": quiche
+}
+# add new clients here
+clients = {
+    "browsertime": browsertime
 }
 
 
@@ -61,6 +66,23 @@ def copy_server_files(args):
     server.copy_files(topo, args.destination)
     return True
 
+
+# runs a client
+def run_client(args):
+    client = clients[args.client]
+
+    # check if the topology is up and the site exists
+    topo = Topology(args.namespace_id)
+    if not topo.exists():
+        print(f"Unable to run client: {args.namespace_id} topology not found!")
+        return False
+    if not site_exists(args.website):
+        print(f"Unable to run client: {args.website} not found in `sites/`!")
+        return False
+
+    # call the server start method
+    client.run(topo, args.website, args.destination)
+    return True
 
 
 

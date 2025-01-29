@@ -33,6 +33,18 @@ def configure_cli_args():
         "performance_tool", choices=["browsertime", "lighthouse"], help="Performance measurement tool")
     run_parser.set_defaults(func=run_testbed)
 
+    # Client commands
+    client_parser = subparsers.add_parser("client", help="Commands to run clients")
+    client_parser.add_argument("client", choices=clients.keys(), help="Target client")
+    client_cmd_parser = client_parser.add_subparsers(
+        dest="client_command", required=True)
+    run_parser = client_cmd_parser.add_parser(
+        "run", help="Run a client for a website in a particular namespace")
+    run_parser.add_argument("--website", required=True, type=str, help="Website to target")
+    run_parser.add_argument("--namespace-id", required=True, type=str, help="Name/ID of topology to run on")
+    run_parser.add_argument("--destination", required=True, type=str, default="results/", help="Location to save files to")
+    run_parser.set_defaults(func=run_client)
+
     # Server commands
     server_parser = subparsers.add_parser(
         "server", help="Commands to manage servers")
