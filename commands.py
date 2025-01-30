@@ -1,7 +1,7 @@
 from topology import Topology
 from mitmproxy.mitmproxy import capture_site, site_exists, get_hostnames
 from servers import quiche
-from clients import browsertime
+from clients import browsertime, lighthouse
 from certs.certs import create_certs
 from dns import start_dnsmasq
 import os
@@ -12,7 +12,8 @@ servers = {
 }
 # add new clients here
 clients = {
-    "browsertime": browsertime
+    "browsertime": browsertime,
+    "lighthouse": lighthouse
 }
 
 
