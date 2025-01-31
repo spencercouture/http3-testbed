@@ -68,15 +68,10 @@ def configure_cli_args():
     copy_parser.set_defaults(func=copy_server_files)
 
     # site commands
-    site_parser = subparsers.add_parser(
-        "site", help="Perform site-related commands")
-    site_parser.add_argument(
-        "website", type=str, help="Target website (e.x.: www.wikipedia.org")
-    # add subcommands
-    site_cmd_parser = site_parser.add_subparsers(
-        dest="site_command", required=True)
-    capture_parser = site_cmd_parser.add_parser(
+    capture_parser = subparsers.add_parser(
         "capture", help="Capture a given website")
+    capture_parser.add_argument(
+        "website", type=str, help="Target website (e.x.: www.wikipedia.org")
     capture_parser.add_argument(
         "--overwrite", action="store_true", help="Overwrite existing protobuf_files")
     capture_parser.set_defaults(func=capture)
