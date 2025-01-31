@@ -48,6 +48,11 @@ pushd browsertime
 ./build.sh
 popd
 
+# build lighthouse
+pushd lighthouse
+./build.sh
+popd
+
 # build mahimahi-gen
 pushd mitmproxy
 ./build.sh
@@ -65,10 +70,27 @@ popd
 Interacting with this repository involves using the `main.py` script to interact with the CLI, like so:
 `sudo ./main.py <cmd> ...`
 
-The CLI provides commands that can be used to capture websites,bring up/down topologies, start servers, run clients, etc. Commands are split up into command groups with respective subcommands. Each command/subcommand may have its own requirements for arguments, but the argparse output should be helpful in explaining which if you miss them.
+The CLI provides commands that can be used to capture websites, bring up/down topologies, start servers, run clients, etc. Commands are split up into command groups with respective subcommands. Each command/subcommand may have its own requirements for arguments, but the argparse output should be helpful in explaining which if you miss them.
+
+Most of these commands execute a single build step. In order to run a full testbed start to finish, the following steps must occur:
+ - website is captured
+ - topology is started (requires a namespace-id)
+ - server is started (reqs. namespace-id to add to and a website to serve)
+ - client is run (reqs. namespace-id to run on and website to connect to)
+
+### Commands
+
+#### Capture
+Usage: `./main.py capture <website> [--overwrite]`
+
+... where `<website>` is in the form of `www.unh.edu`. `--overwrite` is used to replace an existing website's protobuf_files.
+
+The capture command is used to capture websites in `sites/`. This is accomplished by spinning up a `mahimahi-gen` container that acts as an HTTPS proxy. This container uses mitmproxy with a custom python script to output all the traffic as mahimahi protobuf files. It also outputs a `pp_sorted.txt` file that lets you browse the headers (clumsily) as a text file.
+
+Previously, a browsertime container was used as the client (with the --proxy.https flag set to the aforementioned container), but due to browsertime's performance limitations, I updated to use lighthouse as the client instead. This proves to be much more efficient. The code to use browsertime as a client still exists in `mitmproxy.py` and can be uncommented out if needed.
+
 
 ### Usage
-
 Here are the high-level commands (and their respective subcommands):
 - Topology: manage testbed topologies
   - up: Bring up a topology
