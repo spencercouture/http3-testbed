@@ -44,7 +44,7 @@ def capture_site(site, overwrite=False):
 
     # runs the browsertime container
     dflags = "--add-host=host.docker.internal:host-gateway --rm"
-    btflags = f"--video --visualMetrics --proxy.https host.docker.internal:8080 --iterations 1"
+    btflags = f"--video --visualMetrics --proxy.https host.docker.internal:8080 --iterations 1 --timeouts.pageCompleteCheck 600000"
     runcmd(f"docker run {dflags} sitespeedio/browsertime:22.6.0 {btflags} https://{site}")
 
     # copy files over
