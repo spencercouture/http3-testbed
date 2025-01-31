@@ -42,10 +42,18 @@ def capture_site(site, overwrite=False):
     print("Sleeping for 3 seconds to ensure mitmproxy is up...")
     time.sleep(3)
 
-    # runs the browsertime container
-    dflags = "--add-host=host.docker.internal:host-gateway --rm"
-    btflags = f"--video --visualMetrics --proxy.https host.docker.internal:8080 --iterations 1 --timeouts.pageCompleteCheck 600000"
-    runcmd(f"docker run {dflags} sitespeedio/browsertime:22.6.0 {btflags} https://{site}")
+    # # runs the browsertime container
+    # dflags = "--add-host=host.docker.internal:host-gateway --rm"
+    # btflags = f"--video --visualMetrics --proxy.https host.docker.internal:8080 --iterations 1 --timeouts.pageCompleteCheck 600000"
+    # runcmd(f"docker run {dflags} sitespeedio/browsertime:22.6.0 {btflags} https://{site}")
+
+    # make our rundir and copy the script over
+    dflags = "--add-host=host.docker.internal:host-gateway --rm -it --entrypoint=/bin/sh --name lighthouse-capture --detach"
+    runcmd(f"docker run {dflags} scouture/lighthouse")
+    runcmd("docker exec lighthouse-capture mkdir -p /lighthouse/")
+    run_script = os.path.join(SCRIPT_DIR, "..", "lighthouse/run-proxy-lighthouse.sh")
+    runcmd(f"docker cp {run_script} lighthouse-capture:/")
+    runcmd(f"docker exec lighthouse-capture sh -- /run-proxy-lighthouse.sh {site}")
 
     # copy files over
     shutil.copytree(output_path, proto_path, dirs_exist_ok=True)
