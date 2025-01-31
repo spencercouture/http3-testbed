@@ -1,0 +1,7 @@
+certs/*
+!certs/*.cert
+!certs/*.key
+!certs/*.sh
+!certs/*.py
+nenv
+__pycache__
