@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import argparse
 from commands import *
+import os
+import sys
 
 
 def configure_cli_args():
@@ -80,6 +82,10 @@ def configure_cli_args():
 
 
 def main():
+    # ensure root user
+    if os.geteuid():
+        sys.exit("Must be root!")
+
     args = configure_cli_args()
     args.func(args)
 
