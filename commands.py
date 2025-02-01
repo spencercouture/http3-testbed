@@ -3,6 +3,7 @@ from mitmproxy.mitmproxy import capture_site, site_exists, get_hostnames
 from servers import quiche
 from clients import browsertime, lighthouse
 from certs.certs import create_certs
+from presets import PRESETS
 from dns import start_dnsmasq
 import os
 
@@ -85,6 +86,11 @@ def run_client(args):
     client.run(topo, args.website, args.destination)
     return True
 
+
+# runs a provided preset function
+def run_preset(args):
+    preset_f = PRESETS[args.preset_name]
+    preset_f(args.destination)
 
 
 # topology commands

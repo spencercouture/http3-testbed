@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 from commands import *
+from presets import PRESETS
 import os
 import sys
 
@@ -28,12 +29,19 @@ def configure_cli_args():
     # Run testbed command
     run_parser = subparsers.add_parser(
         "run", help="Run the full testbed sequence")
-    run_parser.add_argument("website", type=str, help="Website to test")
-    run_parser.add_argument(
-        "server", choices=["quiche", "h2o"], help="Server type")
-    run_parser.add_argument(
-        "performance_tool", choices=["browsertime", "lighthouse"], help="Performance measurement tool")
-    run_parser.set_defaults(func=run_testbed)
+    run_cmd_parser = run_parser.add_subparsers(dest="run_cmd", required=True)
+    preset_parser = run_cmd_parser.add_parser("preset", help="Run a preset function defined in presets.py")
+    preset_parser.add_argument("preset_name", choices=PRESETS.keys(), help="Name of preset function to use")
+    preset_parser.add_argument("--destination", required=True, type=str, help="Location to save files to")
+    preset_parser.set_defaults(func=run_preset)
+
+
+    # run_parser.add_argument("website", type=str, help="Website to test")
+    # run_parser.add_argument(
+    #     "server", choices=["quiche", "h2o"], help="Server type")
+    # run_parser.add_argument(
+    #     "performance_tool", choices=["browsertime", "lighthouse"], help="Performance measurement tool")
+    # run_parser.set_defaults(func=run_testbed)
 
     # Client commands
     client_parser = subparsers.add_parser("client", help="Commands to run clients")
