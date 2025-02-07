@@ -58,7 +58,7 @@ def configure_cli_args():
         "start", help="Start a server in a particular namespace")
     start_parser.add_argument("--website", required=True, type=str, help="Website to serve")
     start_parser.add_argument("--namespace-id", required=True, type=str, help="Name/ID of topology to run on")
-    start_parser.add_argument("--address", required=True, type=str, default="10.0.9.83", help="Address to serve on")
+    start_parser.add_argument("--address", type=str, default="10.0.9.83", help="Address to serve on")
     start_parser.add_argument("--port", type=int, default=443, help="Port to server on (default 443)")
     start_parser.set_defaults(func=start_server)
     stop_parser = server_cmd_parser.add_parser("stop", help="Stop a server in a particular namespace")
