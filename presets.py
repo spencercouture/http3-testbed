@@ -20,7 +20,7 @@ def register_preset(name):
 def full_quiche_run():
     quiche_addr = "10.0.9.83"
     # run full testbed for each of the sites
-    sites = [("www.unh.edu","unh")]
+    sites = [("www.unh.edu", "unh")]
     for (site, nsid) in sites:
         # first bring the topo up
         topo = Topology(nsid).up()
@@ -32,5 +32,13 @@ def full_quiche_run():
 
         # start quiche
         quiche.start(topo, site, quiche_addr, 443, cert_dir)
+
+        # pause for input (RUN CLIENT)
+        input("pausing")
+
+        # stop server and copy files
+        quiche.stop(topo)
+        quiche.copy_files(topo, "results/full-run")
+
 
 
