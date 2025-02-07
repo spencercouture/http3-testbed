@@ -60,6 +60,7 @@ def capture_site(site, overwrite=False):
 
     # stop the mahimahi gen container
     runcmd(f"docker stop {mitm.decode('utf-8').strip()}")
+    runcmd("docker stop lighthouse-capture")
 
     return True
 
