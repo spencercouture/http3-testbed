@@ -23,7 +23,7 @@ def capture_site(site, overwrite=False):
     if os.path.exists(proto_path):
         if not overwrite:
             print(f"{proto_path} exists and overwrite was not supplied.")
-            print("Quitting...")
+            print("skipping site capture...")
             return False
         shutil.rmtree(proto_path)
 
