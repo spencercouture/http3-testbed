@@ -3,7 +3,7 @@ from certs.certs import create_certs
 from mitmproxy.mitmproxy import get_hostnames, capture_site
 from dns import start_dnsmasq
 from servers import quiche
-from clients import browsertime
+from clients import browsertime, lighthouse
 import os
 
 
@@ -39,10 +39,16 @@ def full_quiche_run(result_dir):
         # start quiche
         quiche.start(topo, site, quiche_addr, 443, cert_dir)
 
-        # pause for input (RUN CLIENT)
-        input("pausing")
+        # run browsertime
+        print("running browsertime...")
         btpath = os.path.join(site_res_dir, "browsertime")
-        browsertime.run(topo, site, btpath)
+        btstats = browsertime.run(topo, site, btpath)
+
+        # run lighthouse
+        print("running lighthouse...")
+        lhpath = os.path.join(site_res_dir, "lighthouse")
+        lhstats = lighthouse.run(topo, site, lhpath)
+
 
         # stop server and copy files
         quiche_path = os.path.join(site_res_dir, "quiche")
