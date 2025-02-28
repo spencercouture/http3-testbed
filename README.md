@@ -12,7 +12,7 @@ The process of building this project involves:
 
 ### Installing Dependencies
 First install required apt packages:
-`sudo apt-get update -y && sudo apt-get install -y git ethtool python3-protobuf cmake build-essential dnsmasq`
+`sudo apt-get update -y && sudo apt-get install -y git ethtool python3-protobuf python3-numpy cmake build-essential dnsmasq`
 
 Install Docker (steps from: https://docs.docker.com/engine/install/debian/):
 ```
