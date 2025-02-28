@@ -72,9 +72,9 @@ class ownprocess:
         self.p.stderr.close()
 
 
-def runcmd(cmd, namespace=None):
+def runcmd(cmd, namespace=None, exceptionok=False):
     args = cmd.split(" ")
-    return run(args, namespace=namespace)
+    return run(args, namespace=namespace, exceptionok=exceptionok)
 
 
 def run(args, namespace=None, cwd=None, exceptionok=False, bg=False,
