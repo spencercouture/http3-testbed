@@ -26,7 +26,12 @@ def full_quiche_run(result_dir):
     for (site, nsid) in sites:
         # capture the site. (if not already present)
         capture_site(site)
+
         site_res_dir = os.path.join(result_dir, site)
+        if os.path.isdir(site_res_dir):
+            print(f"error: {site_res_dir} exists. skipping {site}...")
+            continue
+
         # first bring the topo up
         topo = Topology(nsid)
         topo.up()
@@ -48,7 +53,6 @@ def full_quiche_run(result_dir):
         print("running lighthouse...")
         lhpath = os.path.join(site_res_dir, "lighthouse")
         lhstats = lighthouse.run(topo, site, lhpath)
-
 
         # stop server and copy files
         quiche_path = os.path.join(site_res_dir, "quiche")
