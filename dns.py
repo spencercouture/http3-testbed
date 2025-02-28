@@ -39,5 +39,5 @@ def stop_dnsmasq(topo):
 
     pid = runcmd(f"cat {pid_file}").stdout.decode("utf-8").strip()
 
-    runcmd(f"kill -9 {pid}")
+    runcmd(f"kill -9 {pid}", exceptionok=True)
     os.remove(pid_file)
