@@ -3,5 +3,9 @@ certs/*
 !certs/*.key
 !certs/*.sh
 !certs/*.py
+dns/*
+mitmproxy/run/output/
+output/*
+sites/*
 nenv
 __pycache__
