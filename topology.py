@@ -1,6 +1,6 @@
 # from setup.process import run
 import math
-from process import runcmd
+from process import runcmd, ownprocess
 from dns import DNS_ADDR
 
 
@@ -31,7 +31,6 @@ class Topology:
 
         # sets up the namespace, veth pair, and ip for the DNS server
         self._setup_dns(DNS_ADDR)
-
 
     # connects an arbitrary NS to the -clients NS with a given IP:
     # - create veth pairs
@@ -97,7 +96,7 @@ class Topology:
     def create_veth_pairs(self, v1, v2):
         runcmd(f"ip link add {v1} type veth peer name {v2}")
         runcmd(f"ethtool -K {v1} tso off gso off gro off")
-        runcmd(f"ethtool -K {v1} tso off gso off gro off")
+        runcmd(f"ethtool -K {v2} tso off gso off gro off")
 
     # removes all of the namespaces we know about, plus any others supplied
     def teardown(self, *additional_namespaces):
@@ -114,6 +113,23 @@ class Topology:
         # Delete the namespaces
         for ns in namespaces:
             runcmd(f"ip netns del {ns}")
+
+    def nuke_all():
+        try:
+            ownprocess.run(["ip", "-all", "netns", "delete"], check=False)
+        except Exception as e:
+            print(f"exception deleting netns: {e}")
+
+        try:
+            result = ownprocess.run(
+                ["docker", "ps", "-aq"],
+                capture_output=True, text=True
+            )
+            ids = result.stdout.split()
+            if ids:
+                ownprocess.run(["docker", "rm", "-f"] + ids, check=False)
+        except Exception as e:
+            print(f"exception running docker rm: {e}")
 
     def _create_transit_network(self):
         # create 4 namespaces, each with their own bridge
