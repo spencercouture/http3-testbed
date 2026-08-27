@@ -237,24 +237,25 @@ def full_quiche_run(result_dir):
     for (site, nsid) in sites:
         fails = []
         status_msg = ""
+        Topology.nuke_all()
 
         def log(m):
             status_msg = m
             print(m)
         try:
             # capture the site. (if not already present)
-            log("capturing site")
-            capture_site(site)
+            log(f"capturing {site}")
+            capture_site(site, overwrite=False)
             site_res_dir = os.path.join(result_dir, site)
             if os.path.isdir(site_res_dir):
-                raise RuntimeException(f"error: {site_res_dir} exists. skipping {site}...")
+                raise Exception(f"error: {site_res_dir} exists. skipping {site}...")
 
             log("bringing topology up")
             # first bring the topo up
             topo = Topology(nsid)
             topo.up()
 
-            log("writing impairements")
+            log("writing global impairements")
             # write our impairements to a file
             os.makedirs(site_res_dir, exist_ok=True)
             with open(os.path.join(site_res_dir, "impairement.txt"), "w") as f:
@@ -262,46 +263,48 @@ def full_quiche_run(result_dir):
 
             # for each impairement...
             for i, imp in enumerate(impairements):
+                log(f"beginning run{i} (of {site})")
                 first = i == 0
                 topo.apply_impairements(imp["bw"], imp["rtt"], imp["bdp"], first=first, loss=imp["loss"])
                 run_dir = os.path.join(site_res_dir, f"run{i}")
                 os.makedirs(run_dir, exist_ok=True)
 
+                log("writing local impairements")
                 # ... write individual impairement to a file
                 with open(os.path.join(run_dir, "impairement.txt"), "w") as f:
                     json.dump(imp, f, indent=4)
 
-             log("writing impairements")
-            # get certs and DNS configured
-            hostnames = get_hostnames(site)
-            cert_dir = create_certs(hostnames)
-            start_dnsmasq(topo, hostnames, quiche_addr)
+                # get certs and DNS configured
+                hostnames = get_hostnames(site)
+                cert_dir = create_certs(hostnames)
+                start_dnsmasq(topo, hostnames, quiche_addr)
 
-            log("starting quiche")
-            # start quiche
-            quiche.start(topo, site, quiche_addr, 443, cert_dir)
+                log("starting quiche")
+                # start quiche
+                quiche.start(topo, site, quiche_addr, 443, cert_dir)
 
-            # run browsertime
-            log("running browsertime...")
-            btpath = os.path.join(site_res_dir, "browsertime")
-            btstats = browsertime.run(topo, site, btpath)
+                # run browsertime
+                log("running browsertime...")
+                btpath = os.path.join(run_dir, "browsertime")
+                btstats = browsertime.run(topo, site, btpath)
 
-            # run lighthouse
-            log("running lighthouse...")
-            lhpath = os.path.join(site_res_dir, "lighthouse")
-            lhstats = lighthouse.run(topo, site, lhpath)
+                # run lighthouse
+                log("running lighthouse...")
+                lhpath = os.path.join(run_dir, "lighthouse")
+                lhstats = lighthouse.run(topo, site, lhpath)
 
-            # stop server and copy files
-            quiche_path = os.path.join(site_res_dir, "quiche")
-            quiche.copy_files(topo, quiche_path)
-            quiche.stop(topo)
+                # stop server and copy files
+                quiche_path = os.path.join(run_dir, "quiche")
+                quiche.copy_files(topo, quiche_path)
+                quiche.stop(topo)
+
+                time.sleep(10)
 
             # remove topology namespaces
             topo.teardown()
-
-            time.sleep(10)
-        exception Exception as e:
-            print(f"ERROR for {site} {status_msg}")
+        except Exception as e:
+            print(f"ERROR for {site} '{status_msg}'")
+            print(e)
             fails.append(site)
             Topology.nuke_all()
     for fail in fails:
