@@ -1,6 +1,6 @@
 # from setup.process import run
 import math
-from process import runcmd, ownprocess
+from process import runcmd
 from dns import DNS_ADDR
 
 
@@ -116,18 +116,16 @@ class Topology:
 
     def nuke_all():
         try:
-            ownprocess.run(["ip", "-all", "netns", "delete"], check=False)
+            runcmd("ip -all netns delete")
         except Exception as e:
             print(f"exception deleting netns: {e}")
 
         try:
-            result = ownprocess.run(
-                ["docker", "ps", "-aq"],
-                capture_output=True, text=True
-            )
-            ids = result.stdout.split()
+            result = runcmd("docker ps -aq")
+            ids = result.stdout.decode("utf-8").split()
             if ids:
-                ownprocess.run(["docker", "rm", "-f"] + ids, check=False)
+                print(f"deleting docker containers: {' '.join(ids)}")
+                runcmd(f"docker rm -f {' '.join(ids)}")
         except Exception as e:
             print(f"exception running docker rm: {e}")
 

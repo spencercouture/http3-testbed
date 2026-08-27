@@ -5,7 +5,8 @@ RUN apt-get update && apt-get install -y \
   iputils-ping \
   dnsutils \
   nano \
-  libnss3-tools
+  libnss3-tools \
+  iperf3
 
 # setup certs
 RUN [ -d ~/.pki/nssdb ] || mkdir -p ~/.pki/nssdb

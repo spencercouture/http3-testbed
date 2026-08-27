@@ -35,12 +35,26 @@ def run(topo, website, result_dir):
         "--chrome.collectNetLog true "
         "--timeouts.pageCompleteCheck 300000 "
         "--timeouts.pageLoad 300000 "
+        "--screenshot "
         "--visualMetrics "
         "-n 1 "
         "--videoParams.framerate 50 "
         "--videoParams.createFilmstrip false "
         "--useSameDir true"
     )
+
+    # make the result directory
+    result_dir = os.path.abspath(result_dir)
+    os.makedirs(result_dir, exist_ok=True)
+
+    # run iperf
+    print("running iperf3...")
+    dockercmd = f"docker exec {dflags} browsertime-{topo.nsid} iperf3 -c 10.0.9.83"
+    p = process_run(shlex.split(dockercmd))
+    print(f"iperf3 stdout:\n{p.stdout.decode('utf-8').strip()}\niperf3 stderr:\n{p.stderr.decode('utf-8').strip()}")
+    # Write iperf3 output to a file
+    with open(os.path.join(result_dir, "iperf3_output.txt"), "w") as f:
+        f.write(f"stdout:\n{p.stdout.decode('utf-8').strip()}\nstderr:\n{p.stderr.decode('utf-8').strip()}")
 
     # run the client then copy the files over to the destination dir
     # split it up like this so the flags correctly go to browsertime (and not node)
@@ -49,8 +63,6 @@ def run(topo, website, result_dir):
     print(f"browsertime stdout:\n{p.stdout.decode('utf-8').strip()}\nbrowsertime stderr:\n{p.stderr.decode('utf-8').strip()}")
 
     # copy the results over
-    result_dir = os.path.abspath(result_dir)
-    os.makedirs(result_dir, exist_ok=True)
     runcmd(f"docker cp browsertime-{topo.nsid}:/browsertime/. {result_dir}")
 
     # compute our metrics

@@ -37,6 +37,11 @@ def start(topo, website, addr, port, cert_dir):
         f"--key /certs/cert.key"
     )
 
+    # first run iperf3
+    dockercmds = f"docker exec -d {d_flags} quiche-server-{topo.nsid}".split(" ")
+    iperfcmds = ["bash", "-c", "iperf3 -s 2>&1 | tee /quiche/iperf3.log"]
+    run(dockercmds + iperfcmds)
+
     # we split it up like this so we can use tee inside the docker cmd, and handle server output that way
     dockercmds = f"docker exec -d {d_flags} quiche-server-{topo.nsid}".split(" ")
     quichecmds = ["bash", "-c", f"quiche-server {quiche_flags} 2>&1 | tee /quiche/server.log"]
