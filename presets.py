@@ -37,12 +37,12 @@ def full_quiche_run(result_dir):
             "bdp": 1,
             "loss": 0
         },  # ~500 Mbps    fiber / fast cable
-        {
-            "bw":  250,
-            "rtt": 20,
-            "bdp": 1,
-            "loss": 0
-        },  # ~250 Mbps    cable / strong 5G
+        # {
+        #     "bw":  250,
+        #     "rtt": 20,
+        #     "bdp": 1,
+        #     "loss": 0
+        # },  # ~250 Mbps    cable / strong 5G
         {
             "bw":  100,
             "rtt": 20,
@@ -54,68 +54,70 @@ def full_quiche_run(result_dir):
             "rtt": 20,
             "bdp": 1,
             "loss": 0
-        },  # ~50 Mbps     entry broadband / good LTE
-        {
-            "bw":  10,
-            "rtt": 20,
-            "bdp": 1,
-            "loss": 0
-        },  # ~10 Mbps     weak link, kept as prior-work anchor
-
-        # --- RTT sweep at 100 Mbps, no loss (throughput ~flat; this drives page-load time) ---
-        {
-            "bw":  100,
-            "rtt": 10,
-            "bdp": 1,
-            "loss": 0
-        },  # ~100 Mbps    same-region fiber
-        {
-            "bw":  100,
-            "rtt": 100,
-            "bdp": 1,
-            "loss": 0
-        },  # ~100 Mbps    transcontinental / mobile
-
-        # --- random loss at 100 Mbps / 40ms (loss-based CC capped well under link rate) ---
-        {
-            "bw":  100,
-            "rtt": 40,
-            "bdp": 1,
-            "loss": 0.005
-        },  # ~5 Mbps      CUBIC-limited (BBR ~near link)
-        {
-            "bw":  100,
-            "rtt": 40,
-            "bdp": 1,
-            "loss": 0.01
-        },  # ~3.5 Mbps    CUBIC-limited (BBR ~near link)
-        {
-            "bw":  100,
-            "rtt": 40,
-            "bdp": 1,
-            "loss": 0.02
-        },  # ~2.5 Mbps    CUBIC-limited (BBR ~near link)
-
-        # --- high link + loss: proves the CUBIC ceiling is loss-bound, not link-bound ---
-        {
-            "bw":  500,
-            "rtt": 40,
-            "bdp": 1,
-            "loss": 0.01
-        }   # ~3.5 Mbps    CUBIC (same as the 100 Mbps row above!)
+        }  # ~50 Mbps     entry broadband / good LTE
+        # {
+        #     "bw":  10,
+        #     "rtt": 20,
+        #     "bdp": 1,
+        #     "loss": 0
+        # },  # ~10 Mbps     weak link, kept as prior-work anchor
+        #
+        # # --- RTT sweep at 100 Mbps, no loss (throughput ~flat; this drives page-load time) ---
+        # {
+        #     "bw":  100,
+        #     "rtt": 10,
+        #     "bdp": 1,
+        #     "loss": 0
+        # },  # ~100 Mbps    same-region fiber
+        # {
+        #     "bw":  100,
+        #     "rtt": 100,
+        #     "bdp": 1,
+        #     "loss": 0
+        # },  # ~100 Mbps    transcontinental / mobile
+        #
+        # # --- random loss at 100 Mbps / 40ms (loss-based CC capped well under link rate) ---
+        # {
+        #     "bw":  100,
+        #     "rtt": 40,
+        #     "bdp": 1,
+        #     "loss": 0.005
+        # },  # ~5 Mbps      CUBIC-limited (BBR ~near link)
+        # {
+        #     "bw":  100,
+        #     "rtt": 40,
+        #     "bdp": 1,
+        #     "loss": 0.01
+        # },  # ~3.5 Mbps    CUBIC-limited (BBR ~near link)
+        # {
+        #     "bw":  100,
+        #     "rtt": 40,
+        #     "bdp": 1,
+        #     "loss": 0.02
+        # },  # ~2.5 Mbps    CUBIC-limited (BBR ~near link)
+        #
+        # # --- high link + loss: proves the CUBIC ceiling is loss-bound, not link-bound ---
+        # {
+        #     "bw":  500,
+        #     "rtt": 40,
+        #     "bdp": 1,
+        #     "loss": 0.01
+        # }   # ~3.5 Mbps    CUBIC (same as the 100 Mbps row above!)
     ]
     quiche_addr = "10.0.9.83"
     # run full testbed for each of the sites
     # sites = [("www.npr.org", "npr"), ("www.bbc.com", "bbc"), ("www.bestbuy.com", "bbuy"), ("www.homedepot.org", "hdepo")]
     sites = [
         # Search & Technology
+        # ("www.nike.com", "nikexx"),
         # ("www.nytimes.com", "nytimes"),
         # ("www.homedepot.com", "hmdpot"),
-        # ("www.costco.com", "costco"),
-        # ("www.nike.com", "nikexx"),
+        # ("www.costco.com", "costco")
         # ("www.zillow.com", "zillow"),
         #
         # # News & Information
+        #
+        ("www.npr.org", "nprxxx"),
         # ("www.bbc.com", "bbcnew"),
         # ("www.cnn.com", "cnnnew"),
         # ("www.reuters.com", "reutrs"),
@@ -133,106 +135,106 @@ def full_quiche_run(result_dir):
         # ("www.stripe.com", "stripex"),
         # ("www.chase.com", "chasex"),
         # ("www.bankofamerica.com", "bofamx"),
-        ("www.coinbase.com", "coinbs"),
-        ("www.binance.com", "binanc"),
-        ("www.investopedia.com", "invpda"),
-        ("www.fidelity.com", "fidelx"),
-        ("www.morningstar.com", "mrngst"),
-
-        # Developer, Cloud, & Workspace
-        ("www.github.com", "github"),
-        ("www.gitlab.com", "gitlab"),
-        ("www.stackoverflow.com", "stkovr"),
-        ("www.aws.amazon.com", "awscom"),
-        ("www.cloudflare.com", "cldflr"),
-        ("www.digitalocean.com", "dgtloc"),
-        ("www.npmjs.com", "npmjsp"),
-        ("www.docker.com", "dockrx"),
-        ("www.slack.com", "slackx"),
-        ("www.zoom.us", "zoomus"),
-        ("www.notion.so", "notion"),
-        ("www.figma.com", "figmax"),
-        ("www.canva.com", "canvax"),
-        ("www.dropbox.com", "drpbxm"),
-
-        # Reference, Science & Medical
+        # ("www.coinbase.com", "coinbs"),
+        # ("www.binance.com", "binanc"),
+        # ("www.investopedia.com", "invpda"),
+        # ("www.fidelity.com", "fidelx"),
+        # ("www.morningstar.com", "mrngst"),
+        #
+        # # Developer, Cloud, & Workspace
+        # ("www.github.com", "github"),
+        # ("www.gitlab.com", "gitlab"),
+        # ("www.stackoverflow.com", "stkovr"),
+        # ("www.aws.amazon.com", "awscom"),
+        # ("www.cloudflare.com", "cldflr"),
+        # ("www.digitalocean.com", "dgtloc"),
+        # ("www.npmjs.com", "npmjsp"),
+        # ("www.docker.com", "dockrx"),
+        # ("www.slack.com", "slackx"),
+        # ("www.zoom.us", "zoomus"),
+        # ("www.notion.so", "notion"),
+        # ("www.figma.com", "figmax"),
+        # ("www.canva.com", "canvax"),
+        # ("www.dropbox.com", "drpbxm"),
+        #
+        # # Reference, Science & Medical
         ("www.wikipedia.org", "wikipd"),
-        ("www.britannica.com", "britan"),
-        ("www.nasa.gov", "nasagv"),
-        ("www.nih.gov", "nihgov"),
-        ("www.cdc.gov", "cdcgov"),
-        ("www.nature.com", "nature"),
-        ("www.sciencedirect.com", "scidrt"),
-        ("www.space.com", "spacex"),
-        ("www.wolframalpha.com", "wolpax"),
-
-        # Entertainment, Gaming & Media
-        ("www.twitch.tv", "twitch"),
-        ("www.steampowered.com", "steamp"),
-        ("www.epicgames.com", "epicgm"),
-        ("www.roblox.com", "roblox"),
-        ("www.ign.com", "igncom"),
-        ("www.gamespot.com", "gmspot"),
-        ("www.patreon.com", "patron"),
-        ("www.bandcamp.com", "bandcp"),
-        ("www.deviantart.com", "devart"),
-        ("www.giphy.com", "giphyx"),
-
-        # Travel & Logistics
-        ("www.expedia.com", "expedi"),
-        ("www.skyscanner.net", "skyscn"),
-        ("www.uber.com", "uberxx"),
-        ("www.lyft.com", "lyftxx"),
-        ("www.fedex.com", "fedexx"),
-        ("www.ups.com", "upsxxx"),
-        ("www.usps.com", "uspsxx"),
-
-        # Sports & Hobbies
-        ("www.espn.com", "espnxx"),
-        ("www.nba.com", "nbacom"),
-        ("www.nfl.com", "nflcom"),
-        ("www.strava.com", "strava"),
-        ("www.chess.com", "chessx"),
-        ("www.boardgamegeek.com", "bdgmgk"),
-
-        # Education & Careers
-        ("www.duolingo.com", "duolng"),
-        ("www.udemy.com", "udemyx"),
-        ("www.glassdoor.com", "glsdrx"),
-        ("www.indeed.com", "indeed"),
-        ("www.monster.com", "mnster"),
-
-        # Miscellaneous / High Traffic Utilities
-        ("www.speedtest.net", "spdts"),
-        ("www.imgur.com", "imgurx"),
-        ("www.vimeo.com", "vimeox"),
-        ("www.dailymotion.com", "dlymtn"),
-        ("www.weibo.com", "weibox"),
-        ("www.google.com", "google"),
-        ("www.baidu.com", "baidux"),
-        ("www.yandex.ru", "yandex"),
-        ("www.duckduckgo.com", "duckgo"),
-        ("www.yahoo.com", "yahoos"),
-
-        # Social Media & Communication
-        ("www.facebook.com", "facebk"),
-        ("www.instagram.com", "instag"),
-        ("www.tiktok.com", "tiktok"),
-        ("www.reddit.com", "reddit"),
-        ("www.linkedin.com", "linkdn"),
-        ("www.pinterest.com", "pintr"),
-        ("www.tumblr.com", "tumblx"),
-        ("www.discord.com", "dscord"),
-        ("www.whatsapp.com", "whatsp"),
-        ("www.telegram.org", "telgrm"),
-
-        # E-Commerce & Retail
-        ("www.amazon.com", "amaznx"),
-        ("www.ebay.com", "ebayxx"),
-        ("www.aliexpress.com", "aliexp"),
-        ("www.etsy.com", "etsyxx"),
-        ("www.shopify.com", "shopif"),
-        ("www.ikea.com", "ikeaxx"),
+        # ("www.britannica.com", "britan"),
+        # ("www.nasa.gov", "nasagv"),
+        # ("www.nih.gov", "nihgov"),
+        # ("www.cdc.gov", "cdcgov"),
+        # ("www.nature.com", "nature"),
+        # ("www.sciencedirect.com", "scidrt"),
+        # ("www.space.com", "spacex"),
+        # ("www.wolframalpha.com", "wolpax"),
+        #
+        # # Entertainment, Gaming & Media
+        # ("www.twitch.tv", "twitch"),
+        # ("www.steampowered.com", "steamp"),
+        # ("www.epicgames.com", "epicgm"),
+        # ("www.roblox.com", "roblox"),
+        # ("www.ign.com", "igncom"),
+        # ("www.gamespot.com", "gmspot"),
+        # ("www.patreon.com", "patron"),
+        # ("www.bandcamp.com", "bandcp"),
+        # ("www.deviantart.com", "devart"),
+        # ("www.giphy.com", "giphyx"),
+        #
+        # # Travel & Logistics
+        # ("www.expedia.com", "expedi"),
+        # ("www.skyscanner.net", "skyscn"),
+        # ("www.uber.com", "uberxx"),
+        # ("www.lyft.com", "lyftxx"),
+        # ("www.fedex.com", "fedexx"),
+        # ("www.ups.com", "upsxxx"),
+        # ("www.usps.com", "uspsxx"),
+        #
+        # # Sports & Hobbies
+        # ("www.espn.com", "espnxx"),
+        # ("www.nba.com", "nbacom"),
+        # ("www.nfl.com", "nflcom"),
+        # ("www.strava.com", "strava"),
+        # ("www.chess.com", "chessx"),
+        # ("www.boardgamegeek.com", "bdgmgk"),
+        #
+        # # Education & Careers
+        # ("www.duolingo.com", "duolng"),
+        # ("www.udemy.com", "udemyx"),
+        # ("www.glassdoor.com", "glsdrx"),
+        # ("www.indeed.com", "indeed"),
+        # ("www.monster.com", "mnster"),
+        #
+        # # Miscellaneous / High Traffic Utilities
+        # ("www.speedtest.net", "spdts"),
+        # ("www.imgur.com", "imgurx"),
+        # ("www.vimeo.com", "vimeox"),
+        # ("www.dailymotion.com", "dlymtn"),
+        # ("www.weibo.com", "weibox"),
+        # ("www.google.com", "google"),
+        # ("www.baidu.com", "baidux"),
+        # ("www.yandex.ru", "yandex"),
+        # ("www.duckduckgo.com", "duckgo"),
+        # ("www.yahoo.com", "yahoos"),
+        #
+        # # Social Media & Communication
+        # ("www.facebook.com", "facebk"),
+        # ("www.instagram.com", "instag"),
+        # ("www.tiktok.com", "tiktok"),
+        # ("www.reddit.com", "reddit"),
+        # ("www.linkedin.com", "linkdn"),
+        # ("www.pinterest.com", "pintr"),
+        # ("www.tumblr.com", "tumblx"),
+        # ("www.discord.com", "dscord"),
+        # ("www.whatsapp.com", "whatsp"),
+        # ("www.telegram.org", "telgrm"),
+        #
+        # # E-Commerce & Retail
+        # ("www.amazon.com", "amaznx"),
+        # ("www.ebay.com", "ebayxx"),
+        # ("www.aliexpress.com", "aliexp"),
+        # ("www.etsy.com", "etsyxx")
+        # ("www.shopify.com", "shopif"),
+        ("www.ikea.com", "ikeaxx")
     ]
     for (site, nsid) in sites:
         fails = []
@@ -283,15 +285,21 @@ def full_quiche_run(result_dir):
                 # start quiche
                 quiche.start(topo, site, quiche_addr, 443, cert_dir)
 
-                # run browsertime
-                log("running browsertime...")
-                btpath = os.path.join(run_dir, "browsertime")
-                btstats = browsertime.run(topo, site, btpath)
+                try:
+                    # run browsertime
+                    log("running browsertime...")
+                    btpath = os.path.join(run_dir, "browsertime")
+                    btstats = browsertime.run(topo, site, btpath)
+                except Exception as e:
+                    print(f"Error running browsertime:\n{e}")
 
-                # run lighthouse
-                log("running lighthouse...")
-                lhpath = os.path.join(run_dir, "lighthouse")
-                lhstats = lighthouse.run(topo, site, lhpath)
+                try:
+                    # run lighthouse
+                    log("running lighthouse...")
+                    lhpath = os.path.join(run_dir, "lighthouse")
+                    lhstats = lighthouse.run(topo, site, lhpath)
+                except Exception as e:
+                    print(f"Error running lighthouse:\n{e}")
 
                 # stop server and copy files
                 quiche_path = os.path.join(run_dir, "quiche")

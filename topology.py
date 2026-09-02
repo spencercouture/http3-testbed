@@ -230,8 +230,16 @@ class Topology:
             bwup = bw
 
         bdp_bytes = int(
-            math.ceil((bw / 8. * 1024. * 1024.) * (rtt / 1000.) * bdp))
+            math.ceil((bw / 8. * 1_000_000.) * (rtt / 1000.) * bdp))
         oversized_bdp_packets = int(math.ceil(bdp_bytes * 10. / mtu))
+
+        # tbf's token bucket must be large enough to refill/drain once per
+        # kernel timer tick, or the shaper stalls waiting on tokens and the
+        # achieved rate becomes bursty/inconsistent run-to-run. A fixed
+        # single-MTU burst is far too small at higher rates, so scale it
+        # with the configured rate (~10ms worth of tokens, floor of 1 mtu).
+        burst_bytes = max(mtu, int(bw * 1_000_000 / 8 * 0.010))
+        burst_bytes_up = max(mtu, int(bwup * 1_000_000 / 8 * 0.010))
 
         if loss == 0.0:
             # adding qdiscs - delay
@@ -248,8 +256,8 @@ class Topology:
                 runcmd(f"ip netns exec {self.nsid}-ns1 tc qdisc {op} dev veth{self.nsid}4 root handle 1: netem delay {rtt / 2}ms loss random {loss * 100:.2f}% limit {oversized_bdp_packets}")
                 runcmd(f"ip netns exec {self.nsid}-ns2 tc qdisc {op} dev veth{self.nsid}5 root handle 1: netem delay {rtt / 2}ms loss random {loss * 100:.2f}% limit {oversized_bdp_packets}")
         # adding qdiscs - rate shaping
-        runcmd(f"ip netns exec {self.nsid}-ns3 tc qdisc {op} dev veth{self.nsid}7 root handle 1: tbf rate {bwup}mbit burst {mtu} limit {bdp_bytes}")
-        runcmd(f"ip netns exec {self.nsid}-ns0 tc qdisc {op} dev veth{self.nsid}2 root handle 1: tbf rate {bw}mbit burst {mtu} limit {bdp_bytes}")
+        runcmd(f"ip netns exec {self.nsid}-ns3 tc qdisc {op} dev veth{self.nsid}7 root handle 1: tbf rate {bwup}mbit burst {burst_bytes_up} limit {bdp_bytes}")
+        runcmd(f"ip netns exec {self.nsid}-ns0 tc qdisc {op} dev veth{self.nsid}2 root handle 1: tbf rate {bw}mbit burst {burst_bytes} limit {bdp_bytes}")
 
 
     # checks whether or not the given topology with the nsid exists
