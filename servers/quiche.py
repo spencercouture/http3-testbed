@@ -13,7 +13,7 @@ def start(topo, website, addr, port, cert_dir):
     # setup our flags and starts the container
     proto_path = get_protobuf_path(website)
     dflags = f"--rm -it -d -v {proto_path}:/protobuf_files -v {cert_dir}:/certs --dns {DNS_ADDR} --network=none --name quiche-server-{topo.nsid}"
-    runcmd(f"docker run {dflags} scouture/protobuf-quiche /bin/bash")
+    runcmd(f"docker run {dflags} scouture/protobuf-quiche-noprio /bin/bash")
     pid = runcmd(f"docker inspect -f {{{{.State.Pid}}}} quiche-server-{topo.nsid}")
     pid = pid.stdout.decode("utf-8").strip()
     runcmd(f"docker exec -d quiche-server-{topo.nsid} mkdir -p /quiche/")
