@@ -229,8 +229,8 @@ class Topology:
         if bwup is None:
             bwup = bw
 
-        bdp_bytes = int(
-            math.ceil((bw / 8. * 1_000_000.) * (rtt / 1000.) * bdp))
+        ref_bw = 1000
+        bdp_bytes = int(math.ceil((ref_bw / 8. * 1_000_000.) * (rtt / 1000.) * bdp))
         oversized_bdp_packets = int(math.ceil(bdp_bytes * 10. / mtu))
 
         # tbf's token bucket must be large enough to refill/drain once per
