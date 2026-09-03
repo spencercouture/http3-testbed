@@ -242,6 +242,7 @@ def full_quiche_run(result_dir):
         Topology.nuke_all()
 
         def log(m):
+            nonlocal status_msg
             status_msg = m
             print(m)
         try:
@@ -265,59 +266,73 @@ def full_quiche_run(result_dir):
 
             # for each impairement...
             for i, imp in enumerate(impairements):
-                log(f"beginning run{i} (of {site})")
-                first = i == 0
-                topo.apply_impairements(imp["bw"], imp["rtt"], imp["bdp"], first=first, loss=imp["loss"])
-                # let tc/netem settle before measuring, so the first
-                # requests aren't caught mid-reconfiguration
-                time.sleep(5)
+                # created up front so a failure anywhere below still has
+                # somewhere to record what happened for this run
                 run_dir = os.path.join(site_res_dir, f"run{i}")
                 os.makedirs(run_dir, exist_ok=True)
-
-                log("writing local impairements")
-                # ... write individual impairement to a file
-                with open(os.path.join(run_dir, "impairement.txt"), "w") as f:
-                    json.dump(imp, f, indent=4)
-
-                # get certs and DNS configured
-                hostnames = get_hostnames(site)
-                cert_dir = create_certs(hostnames)
-                start_dnsmasq(topo, hostnames, quiche_addr)
-
-                log("starting quiche")
-                # start quiche
-                quiche.start(topo, site, quiche_addr, 443, cert_dir)
-                # let the server fully come up before measuring
-                time.sleep(5)
-
                 try:
-                    # run browsertime
-                    log("running browsertime...")
-                    btpath = os.path.join(run_dir, "browsertime")
-                    btstats = browsertime.run(topo, site, btpath)
+                    log(f"beginning run{i} (of {site})")
+                    first = i == 0
+                    topo.apply_impairements(imp["bw"], imp["rtt"], imp["bdp"], first=first, loss=imp["loss"])
+                    # let tc/netem settle before measuring, so the first
+                    # requests aren't caught mid-reconfiguration
+                    time.sleep(5)
+
+                    log("writing local impairements")
+                    # ... write individual impairement to a file
+                    with open(os.path.join(run_dir, "impairement.txt"), "w") as f:
+                        json.dump(imp, f, indent=4)
+
+                    # get certs and DNS configured
+                    hostnames = get_hostnames(site)
+                    cert_dir = create_certs(hostnames)
+                    start_dnsmasq(topo, hostnames, quiche_addr)
+
+                    log("starting quiche")
+                    # start quiche
+                    quiche.start(topo, site, quiche_addr, 443, cert_dir)
+                    # let the server fully come up before measuring
+                    time.sleep(5)
+
+                    try:
+                        # run browsertime
+                        log("running browsertime...")
+                        btpath = os.path.join(run_dir, "browsertime")
+                        btstats = browsertime.run(topo, site, btpath)
+                    except Exception as e:
+                        print(f"Error running browsertime:\n{e}")
+                        with open(os.path.join(run_dir, "browsertime_FAILED.txt"), "w") as f:
+                            f.write(str(e))
+                        fails.append(f"{site} run{i} (browsertime)")
+
+                    try:
+                        # run lighthouse
+                        log("running lighthouse...")
+                        lhpath = os.path.join(run_dir, "lighthouse")
+                        lhstats = lighthouse.run(topo, site, lhpath)
+                    except Exception as e:
+                        print(f"Error running lighthouse:\n{e}")
+                        with open(os.path.join(run_dir, "lighthouse_FAILED.txt"), "w") as f:
+                            f.write(str(e))
+                        fails.append(f"{site} run{i} (lighthouse)")
+
+                    # stop server and copy files
+                    quiche_path = os.path.join(run_dir, "quiche")
+                    quiche.copy_files(topo, quiche_path)
+                    quiche.stop(topo)
+
+                    time.sleep(10)
                 except Exception as e:
-                    print(f"Error running browsertime:\n{e}")
-                    with open(os.path.join(run_dir, "browsertime_FAILED.txt"), "w") as f:
+                    # catch the error here so only this one run is lost
+                    print(f"Run {i} setup failed for {site}: {e}")
+                    with open(os.path.join(run_dir, "run_SETUP_FAILED.txt"), "w") as f:
                         f.write(str(e))
-                    fails.append(f"{site} run{i} (browsertime)")
-
-                try:
-                    # run lighthouse
-                    log("running lighthouse...")
-                    lhpath = os.path.join(run_dir, "lighthouse")
-                    lhstats = lighthouse.run(topo, site, lhpath)
-                except Exception as e:
-                    print(f"Error running lighthouse:\n{e}")
-                    with open(os.path.join(run_dir, "lighthouse_FAILED.txt"), "w") as f:
-                        f.write(str(e))
-                    fails.append(f"{site} run{i} (lighthouse)")
-
-                # stop server and copy files
-                quiche_path = os.path.join(run_dir, "quiche")
-                quiche.copy_files(topo, quiche_path)
-                quiche.stop(topo)
-
-                time.sleep(10)
+                    fails.append(f"{site} run{i} (setup)")
+                    try:
+                        quiche.stop(topo)
+                    except Exception:
+                        pass
+                    continue
 
             # remove topology namespaces
             topo.teardown()
