@@ -1,3 +1,4 @@
+# quiche.py
 from process import runcmd, run
 import os
 from dns import DNS_ADDR
@@ -41,6 +42,14 @@ def start(topo, website, addr, port, cert_dir):
     dockercmds = f"docker exec -d {d_flags} quiche-server-{topo.nsid}".split(" ")
     iperfcmds = ["bash", "-c", "iperf3 -s 2>&1 | tee /quiche/iperf3.log"]
     run(dockercmds + iperfcmds)
+
+    # capture tc qdisc state, place alongside other quiche logs
+    qdisc = runcmd("tc -s qdisc show", namespace=f"{topo.nsid}-ns0", exceptionok=True)
+    qdisc_tmp = f"/tmp/qdisc-{topo.nsid}.log"
+    with open(qdisc_tmp, "w") as f:
+        f.write(qdisc.stdout.decode("utf-8") + qdisc.stderr.decode("utf-8"))
+    runcmd(f"docker cp {qdisc_tmp} quiche-server-{topo.nsid}:/quiche/qdisc.log")
+    os.remove(qdisc_tmp)
 
     # we split it up like this so we can use tee inside the docker cmd, and handle server output that way
     dockercmds = f"docker exec -d {d_flags} quiche-server-{topo.nsid}".split(" ")

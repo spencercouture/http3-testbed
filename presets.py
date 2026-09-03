@@ -236,8 +236,8 @@ def full_quiche_run(result_dir):
         # ("www.shopify.com", "shopif"),
         ("www.ikea.com", "ikeaxx")
     ]
+    fails = []
     for (site, nsid) in sites:
-        fails = []
         status_msg = ""
         Topology.nuke_all()
 
@@ -268,6 +268,9 @@ def full_quiche_run(result_dir):
                 log(f"beginning run{i} (of {site})")
                 first = i == 0
                 topo.apply_impairements(imp["bw"], imp["rtt"], imp["bdp"], first=first, loss=imp["loss"])
+                # let tc/netem settle before measuring, so the first
+                # requests aren't caught mid-reconfiguration
+                time.sleep(5)
                 run_dir = os.path.join(site_res_dir, f"run{i}")
                 os.makedirs(run_dir, exist_ok=True)
 
@@ -284,6 +287,8 @@ def full_quiche_run(result_dir):
                 log("starting quiche")
                 # start quiche
                 quiche.start(topo, site, quiche_addr, 443, cert_dir)
+                # let the server fully come up before measuring
+                time.sleep(5)
 
                 try:
                     # run browsertime
@@ -292,6 +297,9 @@ def full_quiche_run(result_dir):
                     btstats = browsertime.run(topo, site, btpath)
                 except Exception as e:
                     print(f"Error running browsertime:\n{e}")
+                    with open(os.path.join(run_dir, "browsertime_FAILED.txt"), "w") as f:
+                        f.write(str(e))
+                    fails.append(f"{site} run{i} (browsertime)")
 
                 try:
                     # run lighthouse
@@ -300,6 +308,9 @@ def full_quiche_run(result_dir):
                     lhstats = lighthouse.run(topo, site, lhpath)
                 except Exception as e:
                     print(f"Error running lighthouse:\n{e}")
+                    with open(os.path.join(run_dir, "lighthouse_FAILED.txt"), "w") as f:
+                        f.write(str(e))
+                    fails.append(f"{site} run{i} (lighthouse)")
 
                 # stop server and copy files
                 quiche_path = os.path.join(run_dir, "quiche")
@@ -315,6 +326,6 @@ def full_quiche_run(result_dir):
             print(e)
             fails.append(site)
             Topology.nuke_all()
+    print("Run complete. Errors with the following:")
     for fail in fails:
-        print("Run complete. Errors with the following sites:")
-        print(f" - {site}")
+        print(f" - {fail}")
