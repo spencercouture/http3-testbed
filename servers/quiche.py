@@ -20,7 +20,7 @@ def start(topo, website, addr, port, cert_dir):
 
     # link the namespace
     runcmd("mkdir -p /var/run/netns")
-    runcmd(f"ln -s /proc/{pid}/ns/net /var/run/netns/quiche-server-{topo.nsid}")
+    runcmd(f"ln -sf /proc/{pid}/ns/net /var/run/netns/quiche-server-{topo.nsid}")
 
     # add to the topology
     topo.attach_server_with_ip(f"quiche-server-{topo.nsid}", addr)

@@ -239,7 +239,6 @@ def full_quiche_run(result_dir):
     fails = []
     for (site, nsid) in sites:
         status_msg = ""
-        Topology.nuke_all()
 
         def log(m):
             nonlocal status_msg
@@ -253,11 +252,6 @@ def full_quiche_run(result_dir):
             if os.path.isdir(site_res_dir):
                 raise Exception(f"error: {site_res_dir} exists. skipping {site}...")
 
-            log("bringing topology up")
-            # first bring the topo up
-            topo = Topology(nsid)
-            topo.up()
-
             log("writing global impairements")
             # write our impairements to a file
             os.makedirs(site_res_dir, exist_ok=True)
@@ -266,14 +260,21 @@ def full_quiche_run(result_dir):
 
             # for each impairement...
             for i, imp in enumerate(impairements):
+                Topology.nuke_all()
+                time.sleep(3)
+                log("bringing topology up")
+                # first bring the topo up
+                topo = Topology(nsid)
+                topo.up()
+                time.sleep(3)
+
                 # created up front so a failure anywhere below still has
                 # somewhere to record what happened for this run
                 run_dir = os.path.join(site_res_dir, f"run{i}")
                 os.makedirs(run_dir, exist_ok=True)
                 try:
                     log(f"beginning run{i} (of {site})")
-                    first = i == 0
-                    topo.apply_impairements(imp["bw"], imp["rtt"], imp["bdp"], first=first, loss=imp["loss"])
+                    topo.apply_impairements(imp["bw"], imp["rtt"], imp["bdp"], first=True, loss=imp["loss"])
                     # let tc/netem settle before measuring, so the first
                     # requests aren't caught mid-reconfiguration
                     time.sleep(5)
